@@ -110,20 +110,46 @@ static NSString *const RTAttachmentPlaceholderString = @"\uFFFC";
 
     self.textView = [[RTTextViewInternal alloc] initWithFrame:self.bounds
                                                 textContainer:container];
-    self.textView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     self.textView.delegate = self;
     self.textView.font = self.font;
     [self addSubview:self.textView];
-
-
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onKeyboardShow:)
-                                                 name:UIKeyboardWillShowNotification
-                                               object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onKeyboardHide:)
-                                                 name:UIKeyboardWillHideNotification
-                                               object:nil];
+    
+    self.textView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    NSLayoutConstraint *topConstraint = [NSLayoutConstraint
+                                         constraintWithItem:self.textView
+                                         attribute:NSLayoutAttributeTop
+                                         relatedBy:NSLayoutRelationEqual
+                                         toItem:self
+                                         attribute:NSLayoutAttributeTop
+                                         multiplier:1.0
+                                         constant:0];
+    NSLayoutConstraint *leftConstraint = [NSLayoutConstraint
+                                         constraintWithItem:self.textView
+                                         attribute:NSLayoutAttributeLeft
+                                         relatedBy:NSLayoutRelationEqual
+                                         toItem:self
+                                         attribute:NSLayoutAttributeLeft
+                                         multiplier:1.0
+                                         constant:0];
+    NSLayoutConstraint *rightConstraint = [NSLayoutConstraint
+                                         constraintWithItem:self.textView
+                                         attribute:NSLayoutAttributeRight
+                                         relatedBy:NSLayoutRelationEqual
+                                         toItem:self
+                                         attribute:NSLayoutAttributeRight
+                                         multiplier:1.0
+                                         constant:0];
+    NSLayoutConstraint *heightConstraint = [NSLayoutConstraint
+                                             constraintWithItem:self.textView
+                                             attribute:NSLayoutAttributeHeight
+                                             relatedBy:NSLayoutRelationEqual
+                                             toItem:self
+                                             attribute:NSLayoutAttributeHeight
+                                             multiplier:1.0
+                                             constant:0];
+                                            
+    [self addConstraints:@[topConstraint, leftConstraint, rightConstraint, heightConstraint]];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
@@ -142,54 +168,6 @@ static NSString *const RTAttachmentPlaceholderString = @"\uFFFC";
         [self _commonInit];
     }
     return self;
-}
-
-- (void)onKeyboardShow:(NSNotification *)notification
-{
-    if (!self.textView.isFirstResponder)
-        return;
-
-    CGRect frame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    CGFloat duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-    NSInteger curve = [notification.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-
-    frame = [self convertRect:frame
-                     fromView:nil];
-    UIEdgeInsets inset = self.textView.contentInset;
-    inset.bottom = self.textView.frame.size.height - frame.origin.y + self.textView.frame.origin.y;
-
-    [UIView animateWithDuration:duration
-                          delay:0
-                        options:curve << 16
-                     animations:^{
-                         self.textView.contentInset = inset;
-                     }
-                     completion:^(BOOL finished) {
-
-                     }];
-}
-
-- (void)onKeyboardHide:(NSNotification *)notification
-{
-    if (!self.isFirstResponder)
-        return;
-    
-    //    CGRect frame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    CGFloat duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-    NSInteger curve = [notification.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-
-    UIEdgeInsets inset = self.textView.contentInset;
-    inset.bottom = 0;
-
-    [UIView animateWithDuration:duration
-                          delay:0
-                        options:curve << 16
-                     animations:^{
-                         self.textView.contentInset = inset;
-                     }
-                     completion:^(BOOL finished) {
-
-                     }];
 }
 
 - (BOOL)becomeFirstResponder
